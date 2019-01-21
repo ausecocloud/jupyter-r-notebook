@@ -35,7 +35,7 @@ RUN apt-get update \
 
 # nbrsessionproxy ... nb and lab extension
 RUN cd /tmp \
- && REV=44162f6ac5c0a3ba614cdde85a5543dc5c15e650 \
+ && REV=6559a1cff63052e8cded86877e0d2a3ebb9e9fad \
  && pip3 install --no-cache-dir https://github.com/ausecocloud/nbrsessionproxy/archive/${REV}.zip \
  && jupyter serverextension enable  --py --sys-prefix nbrsessionproxy \
  && jupyter nbextension     install --py --sys-prefix nbrsessionproxy \
