@@ -75,6 +75,7 @@ RUN conda create --name r35 --yes \
       nomkl \
       pkg-config \
       'r-base<3.6' \
+      r-car \
       r-caret \
       r-data.table \
       r-devtools \
@@ -121,6 +122,7 @@ RUN source activate r35 \
  && Rscript --no-restore --no-save -e 'install.packages( \
       c("ALA4R", "rgbif") \
     )' \
- && Rscript --no-restore --no-save -e 'library(devtools); devtools::install_github("GregGuerin/ausplotsR", build_vignettes=TRUE)'
+ && Rscript --no-restore --no-save -e 'library(devtools); devtools::install_github("GregGuerin/ausplotsR", build_vignettes=TRUE)' \
+ && Rscript --no-restore --no-save -e 'install.packages(c("googlesheets", "MuMIn", "doBy"))'
 
 ENV DEFAULT_KERNEL_NAME=conda_r_r35
