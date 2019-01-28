@@ -111,6 +111,7 @@ RUN source activate r35 \
       c("ALA4R", "rgbif") \
     )' \
  && Rscript --no-restore --no-save -e 'library(devtools); devtools::install_github("GregGuerin/ausplotsR", build_vignettes=TRUE)' \
- && Rscript --no-restore --no-save -e 'install.packages(c("googlesheets", "MuMIn", "doBy", "doSNOW", "gamm4"))'
+ && Rscript --no-restore --no-save -e 'install.packages(c("googlesheets", "MuMIn", "doBy", "doSNOW", "gamm4"))' \
+ && Rscript --no-restore --no-save -e 'library(devtools); devtools::install_github("beckyfisher/FSSgam_package")'
 
 ENV DEFAULT_KERNEL_NAME=conda_r_r35
