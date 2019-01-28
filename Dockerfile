@@ -1,17 +1,24 @@
-FROM hub.bccvl.org.au/jupyter/base-notebook:0.9.4-2
+FROM hub.bccvl.org.au/jupyter/base-notebook:0.9.4-4
 
 USER root
 
-# install RStudio
+# install RStudio and Shiny-Server
 # && apt-get install -yq --no-install-recommends fonts-dejavu \
 RUN apt-get update \
  && apt-get install -yq --no-install-recommends gdebi-core \
- && VERSION=1.1.456 \
+ && VERSION=1.1.463 \
  && curl -LO https://download2.rstudio.org/rstudio-server-stretch-${VERSION}-amd64.deb \
  && gdebi -n rstudio-server-stretch-${VERSION}-amd64.deb \
  && rm rstudio-server-stretch-${VERSION}-amd64.deb \
+ && VERSION=1.5.9.923 \
+ && curl -LO https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-${VERSION}-amd64.deb \
+ && gdebi -n shiny-server-${VERSION}-amd64.deb \
+ && rm shiny-server-${VERSION}-amd64.deb \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+
+# setup shiny bookmarks folder
+
 
 # install Maxent
 ENV MAXENT=/opt/maxent.jar \
@@ -33,28 +40,9 @@ RUN apt-get update \
  && apt-get clean \
  && rm -fr /var/lib/apt/lists/*
 
-# nbrsessionproxy ... nb and lab extension
-RUN cd /tmp \
- && REV=6559a1cff63052e8cded86877e0d2a3ebb9e9fad \
- && pip3 install --no-cache-dir https://github.com/ausecocloud/nbrsessionproxy/archive/${REV}.zip \
- && jupyter serverextension enable  --py --sys-prefix nbrsessionproxy \
- && jupyter nbextension     install --py --sys-prefix nbrsessionproxy \
- && jupyter nbextension     enable  --py --sys-prefix nbrsessionproxy \
- && curl -LO https://github.com/ausecocloud/nbrsessionproxy/archive/${REV}.zip \
- && unzip ${REV}.zip \
- && cd nbrsessionproxy-${REV}/jupyterlab-rsessionproxy \
- && jlpm install \
- && jlpm run build \
- && jlpm pack \
- && NODE_OPTIONS=--max-old-space-size=4096 jupyter labextension install jupyterlab-rsessionproxy-extension-*.tgz \
- && cd /tmp \
- && rm -fr nbrsessionproxy-${REV} \
- && rm -fr ${REV}.zip \
- && cd \
- && rm -fr /usr/local/share/jupyter/lab/staging \
- && rm -fr /usr/local/share/.cache \
- && rm -fr ~/{.cache,.conda,.npm} \
- && chown -R $NB_USER:$NB_GID $HOME
+
+# RUN pip3 install --no-cache-dir jupyter-rsession-proxy==1.0b6
+RUN pip3 install --no-cache-dir https://github.com/ausecocloud/jupyter-rsession-proxy/archive/ce3960642b6a26e1669a57dfa15cb0a43e7af733.zip
 
 # Setup CRAN mirror
 COPY Rprofile $HOME/.Rprofile
@@ -123,6 +111,6 @@ RUN source activate r35 \
       c("ALA4R", "rgbif") \
     )' \
  && Rscript --no-restore --no-save -e 'library(devtools); devtools::install_github("GregGuerin/ausplotsR", build_vignettes=TRUE)' \
- && Rscript --no-restore --no-save -e 'install.packages(c("googlesheets", "MuMIn", "doBy"))'
+ && Rscript --no-restore --no-save -e 'install.packages(c("googlesheets", "MuMIn", "doBy", "doSNOW", "gamm4"))'
 
 ENV DEFAULT_KERNEL_NAME=conda_r_r35
