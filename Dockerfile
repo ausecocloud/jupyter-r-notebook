@@ -81,6 +81,7 @@ RUN conda create --name r35 --yes \
       r-randomforest \
       r-rcurl \
       r-reshape \
+      r-sf \
       r-shiny \
       r-slam \
       r-sp \
