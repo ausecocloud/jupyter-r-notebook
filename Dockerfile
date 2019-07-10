@@ -51,7 +51,7 @@ RUN chown $NB_USER:$NB_GID $HOME/.Rprofile
 USER $NB_USER
 
 # R wants some lcoale settings
-RUN echo -e '\nexport LANG=C.UTF-8' >> /home/$NB_USER/.bashrc
+RUN echo '\nexport LANG=C.UTF-8' >> /home/$NB_USER/.bashrc
 
 # Install R environment and some useful packages
 # TODO: pin R to latest 3.5
