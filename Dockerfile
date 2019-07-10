@@ -26,9 +26,9 @@ ENV MAXENT=/opt/maxent.jar \
 
 RUN apt-get update \
  && mkdir -p /usr/share/man/man1 \
- && apt-get install -yq --no-install-recommends libv8-3.14-dev \
- && apt-get install -yq --no-install-recommends openjdk-8-jdk-headless \
- && sed -i'' -e 's/^[^#].*/#\0/' /etc/java-8-openjdk/accessibility.properties \
+ && apt-get install -yq --no-install-recommends libnode-dev \
+ && apt-get install -yq --no-install-recommends openjdk-11-jdk-headless \
+ && sed -i'' -e 's/^[^#].*/#\0/' /etc/java-11-openjdk/accessibility.properties \
  && curl -LO https://github.com/mrmaxent/Maxent/archive/${MAXENT_VERSION}.zip \
  && unzip ${MAXENT_VERSION}.zip \
  && rm ${MAXENT_VERSION}.zip \
