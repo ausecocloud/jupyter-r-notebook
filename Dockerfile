@@ -1,4 +1,4 @@
-FROM hub.bccvl.org.au/jupyter/base-notebook:0.9.4-5
+FROM hub.bccvl.org.au/jupyter/base-notebook:0.9.4-7
 
 USER root
 
