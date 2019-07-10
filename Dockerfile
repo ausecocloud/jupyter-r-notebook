@@ -1,15 +1,15 @@
-FROM hub.bccvl.org.au/jupyter/base-notebook:0.9.4-7
+FROM hub.bccvl.org.au/jupyter/base-notebook:0.9.4-9
 
 USER root
 
 # install RStudio and Shiny-Server
 # && apt-get install -yq --no-install-recommends fonts-dejavu \
 RUN apt-get update \
- && apt-get install -yq --no-install-recommends gdebi-core \
- && VERSION=1.1.463 \
- && curl -LO https://download2.rstudio.org/rstudio-server-stretch-${VERSION}-amd64.deb \
- && gdebi -n rstudio-server-stretch-${VERSION}-amd64.deb \
- && rm rstudio-server-stretch-${VERSION}-amd64.deb \
+ && apt-get install -yq --no-install-recommends gdebi-core xz-utils \
+ && VERSION=1.2.1335 \
+ && curl -LO https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${VERSION}-amd64.deb \
+ && gdebi -n rstudio-server-${VERSION}-amd64.deb \
+ && rm rstudio-server-${VERSION}-amd64.deb \
  && VERSION=1.5.9.923 \
  && curl -LO https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-${VERSION}-amd64.deb \
  && gdebi -n shiny-server-${VERSION}-amd64.deb \
@@ -50,9 +50,12 @@ RUN chown $NB_USER:$NB_GID $HOME/.Rprofile
 
 USER $NB_USER
 
+# R wants some lcoale settings
+RUN echo -e '\nexport LANG=C.UTF-8' >> /home/$NB_USER/.bashrc
+
 # Install R environment and some useful packages
 # TODO: pin R to latest 3.5
-RUN conda create --name r35 --yes \
+RUN ${CONDA_DIR}/bin/conda create --name r35 --yes \
       gcc_linux-64 \
       gdal \
       gfortran_linux-64 \
@@ -89,7 +92,7 @@ RUN conda create --name r35 --yes \
       r-tm \
       r-xml2 \
       r-zoo \
- && conda clean -tipsy \
+ && ${CONDA_DIR}/bin/conda clean -tipsy \
  && rm -fr /home/$NB_USER/{.cache,.conda,.npm}
 
 # need this for some R packages... conda R defaults to /bin/gtar :(
