@@ -59,6 +59,8 @@ RUN echo '\nexport LANG=C.UTF-8' >> /home/$NB_USER/.bashrc
 
 # Install R environment and some useful packages
 # also add conda-forge channel to environment
+#    We need bash shell, otherwise condas activate script does not work properly
+SHELL ["/bin/bash", "-c"]
 RUN ${CONDA_DIR}/bin/conda create -c conda-forge --name r36 --yes \
       gcc_linux-64 \
       gdal \
@@ -113,8 +115,6 @@ RUN ${CONDA_DIR}/bin/conda create -c conda-forge --name r36 --yes \
 
 # TODO: some dependencies of these are probably available as conda pkgs.
 # Install some ecology R packages
-#    We need bash shell, otherwise condas activate script does not work properly
-SHELL ["/bin/bash", "-c"]
 RUN eval "$(conda shell.bash hook)" \
  && conda activate r36 \
  && Rscript --no-restore --no-save -e 'install.packages( \
