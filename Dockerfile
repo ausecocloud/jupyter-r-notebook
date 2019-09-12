@@ -29,7 +29,6 @@ ENV MAXENT=/opt/maxent.jar \
 #       or build it inside conda env which will need java anyway
 RUN apt-get update \
  && mkdir -p /usr/share/man/man1 \
- && apt-get install -yq --no-install-recommends libnode-dev \
  && apt-get install -yq --no-install-recommends openjdk-11-jdk-headless \
  && sed -i'' -e 's/^[^#].*/#\0/' /etc/java-11-openjdk/accessibility.properties \
  && curl -LO https://github.com/mrmaxent/Maxent/archive/${MAXENT_VERSION}.zip \
