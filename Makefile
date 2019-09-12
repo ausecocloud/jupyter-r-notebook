@@ -16,7 +16,7 @@
 
 PREFIX = hub.bccvl.org.au/jupyter
 IMAGE = r-notebook
-TAG ?= 0.9.4
+TAG ?= latest
 
 dev:
 	docker run --rm -it -v $(PWD)/jupyter-rsession-proxy:/code/jupyter-rsession-proxy -v $(PWD)/jupyter-server-proxy:/code/jupyter-server-proxy -p 8888:8888 -e "DROPBOX_APPKEY=$(DROPBOX_APPKEY)" $(PREFIX)/$(IMAGE):$(TAG) bash

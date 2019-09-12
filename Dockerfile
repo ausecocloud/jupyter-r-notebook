@@ -1,4 +1,4 @@
-FROM hub.bccvl.org.au/jupyter/base-notebook:0.9.4-11
+FROM hub.bccvl.org.au/jupyter/base-notebook:0.9.4-13
 
 USER root
 
@@ -24,6 +24,9 @@ RUN apt-get update \
 ENV MAXENT=/opt/maxent.jar \
     MAXENT_VERSION=3.4.1
 
+# TODO: we reallly should install java just for this...
+#       either build maxent.jar somehwere else and load it into here,
+#       or build it inside conda env which will need java anyway
 RUN apt-get update \
  && mkdir -p /usr/share/man/man1 \
  && apt-get install -yq --no-install-recommends libnode-dev \
@@ -42,10 +45,12 @@ RUN apt-get update \
 
 
 # RUN pip3 install --no-cache-dir jupyter-rsession-proxy==1.0b6
-RUN pip3 install --no-cache-dir https://github.com/ausecocloud/jupyter-rsession-proxy/archive/ce3960642b6a26e1669a57dfa15cb0a43e7af733.zip
+RUN pip3 install --no-cache-dir https://github.com/ausecocloud/jupyter-rsession-proxy/archive/58570cf2c3fb309446740672461a3cfdf6cdd197.zip
 
+# Add start up scripts
+COPY files/bin/ /usr/local/bin/
 # Setup CRAN mirror
-COPY Rprofile $HOME/.Rprofile
+COPY files/Rprofile $HOME/.Rprofile
 RUN chown $NB_USER:$NB_GID $HOME/.Rprofile
 
 USER $NB_USER
@@ -53,9 +58,13 @@ USER $NB_USER
 # R wants some lcoale settings
 RUN echo '\nexport LANG=C.UTF-8' >> /home/$NB_USER/.bashrc
 
+# setup conda forge
+RUN conda config --add channels conda-forge \
+ && conda config --set channel_priority strict
+
 # Install R environment and some useful packages
 # TODO: pin R to latest 3.5
-RUN ${CONDA_DIR}/bin/conda create --name r35 --yes \
+RUN ${CONDA_DIR}/bin/conda create --name r36 --yes \
       gcc_linux-64 \
       gdal \
       gfortran_linux-64 \
@@ -65,57 +74,58 @@ RUN ${CONDA_DIR}/bin/conda create --name r35 --yes \
       libssh2 \
       nomkl \
       pkg-config \
-      'r-base<3.6' \
+      'r-base<3.7' \
       r-car \
       r-caret \
       r-data.table \
       r-devtools \
+      r-dismo \
       r-dplyr \
+      r-ggdendro \
       r-gridextra \
       r-hexbin \
       r-irkernel \
       r-jpeg \
+      r-knitr \
       r-latticeExtra \
       r-mgcv \
       r-png \
       r-proc \
+      r-proj4 \
       r-r.utils \
       r-raster \
       r-randomforest \
       r-rcurl \
       r-reshape \
+      r-rgdal \
+      r-rgeos \
       r-sf \
+      r-sp \
       r-shiny \
       r-slam \
       r-sp \
       r-sparsem \
       r-tm \
+      r-units \
+      r-v8 \
       r-xml2 \
       r-zoo \
  && ${CONDA_DIR}/bin/conda clean -tipsy \
  && rm -fr /home/$NB_USER/{.cache,.conda,.npm}
 
-# need this for some R packages... conda R defaults to /bin/gtar :(
-ENV TAR=/bin/tar
-
+# TODO: some dependencies of these are probably available as conda pkgs.
 # Install some ecology R packages
 #    We need bash shell, otherwise condas activate script does not work properly
-#    Do I need PKG_CFLAGS, PKG_CXXFLAGS? (C/C++ compile options)
-#    PKG_CPPFLAGS ... C preprocessor options. (used by C++ as well?)
 SHELL ["/bin/bash", "-c"]
-RUN source activate r35 \
- && export PKG_LIBS="-L ${CONDA_PREFIX}/lib" \
- && export PKG_CPPFLAGS="-I ${CONDA_PREFIX}/include" \
+RUN eval "$(conda shell.bash hook)" \
+ && conda activate r36 \
  && Rscript --no-restore --no-save -e 'install.packages( \
-      c("biomod2", "dismo", "rgdal", "rgeos", "proj4", \
-        "ggdendro" ) \
-    )' \
- && Rscript --no-restore --no-save -e 'install.packages("V8", configure.vars="INCLUDE_DIR=/usr/include LIB_DIR=/usr/lib")' \
- && Rscript --no-restore --no-save -e 'install.packages( \
-      c("ALA4R", "rgbif") \
+      c("biomod2", "ALA4R", "rgbif", "goeveg" \
+        ) \
     )' \
  && Rscript --no-restore --no-save -e 'library(devtools); devtools::install_github("ternaustralia/ausplotsR", build_vignettes=TRUE)' \
  && Rscript --no-restore --no-save -e 'install.packages(c("googlesheets", "MuMIn", "doBy", "doSNOW", "gamm4"))' \
  && Rscript --no-restore --no-save -e 'library(devtools); devtools::install_github("beckyfisher/FSSgam_package")'
 
-ENV DEFAULT_KERNEL_NAME=conda_r_r35
+
+ENV DEFAULT_KERNEL_NAME=conda-env-r36-r
