@@ -59,8 +59,6 @@ RUN echo '\nexport LANG=C.UTF-8' >> /home/$NB_USER/.bashrc
 
 # Install R environment and some useful packages
 # also add conda-forge channel to environment
-#    We need bash shell, otherwise condas activate script does not work properly
-SHELL ["/bin/bash", "-c"]
 RUN ${CONDA_DIR}/bin/conda create -c conda-forge --name r36 --yes \
       gcc_linux-64 \
       gdal \
@@ -108,7 +106,12 @@ RUN ${CONDA_DIR}/bin/conda create -c conda-forge --name r36 --yes \
       r-xml2 \
       r-zoo \
  && ${CONDA_DIR}/bin/conda clean -tipsy \
- && rm -fr /home/$NB_USER/{.cache,.conda,.npm} \
+ && rm -fr /home/$NB_USER/{.cache,.conda,.npm}
+
+# configure conda env
+#    We need bash shell, otherwise condas activate script does not work properly
+SHELL ["/bin/bash", "-c"]
+RUN eval "$(conda shell.bash hook)" \
  && conda activate r36 \
  && conda config --env --add channels conda-forge
 
