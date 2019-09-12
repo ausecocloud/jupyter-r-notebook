@@ -1,4 +1,4 @@
-FROM hub.bccvl.org.au/jupyter/base-notebook:0.9.4-13
+FROM hub.bccvl.org.au/jupyter/base-notebook:0.9.4-14
 
 USER root
 
@@ -58,13 +58,9 @@ USER $NB_USER
 # R wants some lcoale settings
 RUN echo '\nexport LANG=C.UTF-8' >> /home/$NB_USER/.bashrc
 
-# setup conda forge
-RUN conda config --add channels conda-forge \
- && conda config --set channel_priority strict
-
 # Install R environment and some useful packages
-# TODO: pin R to latest 3.5
-RUN ${CONDA_DIR}/bin/conda create --name r36 --yes \
+# also add conda-forge channel to environment
+RUN ${CONDA_DIR}/bin/conda create -c cond-forge --name r36 --yes \
       gcc_linux-64 \
       gdal \
       gfortran_linux-64 \
@@ -111,7 +107,10 @@ RUN ${CONDA_DIR}/bin/conda create --name r36 --yes \
       r-xml2 \
       r-zoo \
  && ${CONDA_DIR}/bin/conda clean -tipsy \
- && rm -fr /home/$NB_USER/{.cache,.conda,.npm}
+ && rm -fr /home/$NB_USER/{.cache,.conda,.npm} \
+ && conda activate r36 \
+ && conda config --env --add channels conda-forge
+
 
 # TODO: some dependencies of these are probably available as conda pkgs.
 # Install some ecology R packages
