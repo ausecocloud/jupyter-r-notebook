@@ -59,7 +59,7 @@ RUN echo '\nexport LANG=C.UTF-8' >> /home/$NB_USER/.bashrc
 
 # Install R environment and some useful packages
 # also add conda-forge channel to environment
-RUN ${CONDA_DIR}/bin/conda create -c cond-forge --name r36 --yes \
+RUN ${CONDA_DIR}/bin/conda create -c conda-forge --name r36 --yes \
       gcc_linux-64 \
       gdal \
       gfortran_linux-64 \
