@@ -20,29 +20,6 @@ RUN apt-get update \
 # setup shiny bookmarks folder
 
 
-# install Maxent
-ENV MAXENT=/opt/maxent.jar \
-    MAXENT_VERSION=3.4.1
-
-# TODO: we reallly should install java just for this...
-#       either build maxent.jar somehwere else and load it into here,
-#       or build it inside conda env which will need java anyway
-RUN apt-get update \
- && mkdir -p /usr/share/man/man1 \
- && apt-get install -yq --no-install-recommends openjdk-11-jdk-headless \
- && sed -i'' -e 's/^[^#].*/#\0/' /etc/java-11-openjdk/accessibility.properties \
- && curl -LO https://github.com/mrmaxent/Maxent/archive/${MAXENT_VERSION}.zip \
- && unzip ${MAXENT_VERSION}.zip \
- && rm ${MAXENT_VERSION}.zip \
- && cd Maxent-${MAXENT_VERSION} \
- && make distribution \
- && cp maxent.jar /opt \
- && cd .. \
- && rm -fr Maxent-${MAXENT_VERSION} \
- && apt-get clean \
- && rm -fr /var/lib/apt/lists/*
-
-
 # RUN pip3 install --no-cache-dir jupyter-rsession-proxy==1.0b6
 RUN pip3 install --no-cache-dir https://github.com/ausecocloud/jupyter-rsession-proxy/archive/58570cf2c3fb309446740672461a3cfdf6cdd197.zip
 
@@ -80,6 +57,7 @@ RUN ${CONDA_DIR}/bin/conda create -c conda-forge --name r36 --yes \
       r-gridextra \
       r-hexbin \
       r-irkernel \
+      r-rjava \
       r-jpeg \
       r-knitr \
       r-latticeExtra \
@@ -128,5 +106,24 @@ RUN eval "$(conda shell.bash hook)" \
  && Rscript --no-restore --no-save -e 'install.packages(c("googlesheets", "MuMIn", "doBy", "doSNOW", "gamm4"))' \
  && Rscript --no-restore --no-save -e 'library(devtools); devtools::install_github("beckyfisher/FSSgam_package")'
 
+ENV MAXENT=/usr/local/share/maxent/maxent.jar \
+    MAXENT_VERSION=3.4.1 \
+
+# install maxent and link it into dismo
+RUN eval "$(conda shell.bash hook)" \
+  && conda activate r36 \
+  && cd /tmp \
+  && curl -LO https://github.com/mrmaxent/Maxent/archive/${MAXENT_VERSION}.zip \
+  && unzip ${MAXENT_VERSION}.zip \
+  && rm ${MAXENT_VERSION}.zip \
+  && cd Maxent-${MAXENT_VERSION} \
+  && mkdir $(dirname ${MAXENT}) \
+  && cp maxent.jar ${MAXENT} \
+  && cd .. \
+  && rm -fr Maxent-${MAXENT_VERSION} \
+  && export dismo_maxent=$(Rscript --no-restore --no-save -e 'cat(system.file(package="dismo"), "/java/maxent.jar", sep="")') \
+  && ln -s ${MAXENT} ${dismo_maxent}
+
+# TODO: add $MAXENT to Renviron and .bashrc?
 
 ENV DEFAULT_KERNEL_NAME=conda-env-r36-r
