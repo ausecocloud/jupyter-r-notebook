@@ -106,7 +106,7 @@ RUN eval "$(conda shell.bash hook)" \
  && Rscript --no-restore --no-save -e 'install.packages(c("googlesheets", "MuMIn", "doBy", "doSNOW", "gamm4"))' \
  && Rscript --no-restore --no-save -e 'library(devtools); devtools::install_github("beckyfisher/FSSgam_package")'
 
-ENV MAXENT=/usr/local/share/maxent/maxent.jar \
+ENV MAXENT=/opt/conda/maxent.jar \
     MAXENT_VERSION=3.4.1
 
 # install maxent and link it into dismo
@@ -117,7 +117,6 @@ RUN eval "$(conda shell.bash hook)" \
   && unzip ${MAXENT_VERSION}.zip \
   && rm ${MAXENT_VERSION}.zip \
   && cd Maxent-${MAXENT_VERSION} \
-  && mkdir $(dirname ${MAXENT}) \
   && cp maxent.jar ${MAXENT} \
   && cd .. \
   && rm -fr Maxent-${MAXENT_VERSION} \
