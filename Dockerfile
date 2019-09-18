@@ -107,7 +107,7 @@ RUN eval "$(conda shell.bash hook)" \
  && Rscript --no-restore --no-save -e 'library(devtools); devtools::install_github("beckyfisher/FSSgam_package")'
 
 ENV MAXENT=/usr/local/share/maxent/maxent.jar \
-    MAXENT_VERSION=3.4.1 \
+    MAXENT_VERSION=3.4.1
 
 # install maxent and link it into dismo
 RUN eval "$(conda shell.bash hook)" \
