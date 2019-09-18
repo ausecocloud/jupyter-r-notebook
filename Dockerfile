@@ -117,6 +117,7 @@ RUN eval "$(conda shell.bash hook)" \
   && unzip ${MAXENT_VERSION}.zip \
   && rm ${MAXENT_VERSION}.zip \
   && cd Maxent-${MAXENT_VERSION} \
+  && make distribution \
   && cp maxent.jar ${MAXENT} \
   && cd .. \
   && rm -fr Maxent-${MAXENT_VERSION} \
